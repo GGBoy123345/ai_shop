@@ -1,0 +1,50 @@
+server:
+  port: 8087
+
+spring:
+  application:
+    name: gateway-svc
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+      routes:
+        - id: user-svc
+          uri: lb://user-svc
+          predicates:
+            - Path=/api/auth/**,/api/users/**,/api/merchants/**,/api/addresses/**,/api/favorites/**,/api/admin/**
+
+        - id: product-svc
+          uri: lb://product-svc
+          predicates:
+            - Path=/api/categories/**,/api/products/**,/api/attribute-templates/**,/api/attribute-options/**,/api/skus/**,/api/banners/**
+
+        - id: order-svc
+          uri: lb://order-svc
+          predicates:
+            - Path=/api/carts/**,/api/orders/**,/api/refunds/**,/api/payments/**
+
+        - id: search-svc
+          uri: lb://search-svc
+          predicates:
+            - Path=/api/search/**
+
+        - id: file-svc
+          uri: lb://file-svc
+          predicates:
+            - Path=/api/files/**
+
+        - id: notify-svc
+          uri: lb://notify-svc
+          predicates:
+            - Path=/api/notifications/**
+
+jwt:
+  secret: ${JWT_SECRET:ai-mall-default-secret-key-2024-very-long-key}
+
+logging:
+  level:
+    com.sxpi.pan.aimallgateway: debug
