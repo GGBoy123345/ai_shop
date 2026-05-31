@@ -12,8 +12,30 @@
             <van-uploader v-model="imageList" :max-count="1" :after-read="onImageUpload" :before-delete="onImageDelete" accept="image/*" />
           </template>
         </van-field>
-        <van-field v-model="form.mainImage" label="主图地址" placeholder="上传后自动填入" readonly />
-        <van-field v-model="form.categoryId" label="分类ID" type="number" placeholder="请输入分类ID" :rules="[{ required: true }]" />
+        <van-field
+          :model-value="selectedCategoryName"
+          label="商品分类"
+          placeholder="请选择商品分类"
+          readonly
+          is-link
+          @click="openCategoryPicker"
+          :rules="[{ required: true, message: '请选择商品分类' }]"
+        />
+      </van-cell-group>
+
+      <!-- 商品属性（根据分类动态显示） -->
+      <van-cell-group v-if="attributeTemplates.length > 0" inset title="商品属性" style="margin-top: 10px;">
+        <van-field
+          v-for="template in attributeTemplates"
+          :key="template.id"
+          v-model="attributes[template.id]"
+          :label="template.name"
+          :placeholder="'请输入' + template.name"
+          :required="template.required === 1"
+          :type="template.inputType === 'textarea' ? 'textarea' : 'text'"
+          :rows="template.inputType === 'textarea' ? 3 : undefined"
+          :rules="template.required === 1 ? [{ required: true, message: '请输入' + template.name }] : []"
+        />
       </van-cell-group>
 
       <van-cell-group inset title="商品描述" style="margin-top: 10px;">
@@ -26,15 +48,34 @@
         </van-button>
       </div>
     </van-form>
+
+    <!-- 分类选择弹窗 -->
+    <van-popup v-model:show="showCategoryPicker" position="bottom" round style="height: 60%;">
+      <div class="category-picker">
+        <div class="picker-header">
+          <van-button size="small" @click="showCategoryPicker = false">取消</van-button>
+          <span>选择商品分类</span>
+          <van-button size="small" type="primary" @click="confirmCategory">确认</van-button>
+        </div>
+        <van-tree-select
+          :active-id="tempCategoryId"
+          v-model:main-active-index="mainActiveIndex"
+          :items="categoryItems"
+          @click-nav="onNavClick"
+          @click-item="onItemClick"
+        />
+      </div>
+    </van-popup>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { showToast } from 'vant'
-import { addProduct, updateProduct, getProductDetail } from '../../api/merchant-product'
+import { addProduct, updateProduct, getProductDetail, getAttributeTemplates } from '../../api/merchant-product'
 import { uploadImage } from '../../api/file'
+import { getCategoryTree } from '../../api/product'
 
 const route = useRoute()
 const router = useRouter()
@@ -42,10 +83,46 @@ const isEdit = ref(false)
 const productId = ref(null)
 const submitting = ref(false)
 const imageList = ref([])
+const categoryList = ref([])
+const showCategoryPicker = ref(false)
+const attributeTemplates = ref([])
+const attributes = ref({})
 const form = ref({
   title: '', subtitle: '', price: '', mainImage: '',
   categoryId: '', description: ''
 })
+
+// 将树形分类转换为 TreeSelect 需要的格式
+const categoryItems = computed(() => {
+  return convertToTreeSelectItems(categoryList.value)
+})
+
+// 选中的分类名称
+const selectedCategoryName = computed(() => {
+  if (!form.value.categoryId) return '请选择商品分类'
+  return findCategoryName(categoryList.value, form.value.categoryId) || '请选择商品分类'
+})
+
+function convertToTreeSelectItems(tree) {
+  return tree.map(item => ({
+    text: item.name,
+    id: item.id,
+    children: (item.children && item.children.length > 0)
+      ? convertToTreeSelectItems(item.children)
+      : undefined
+  }))
+}
+
+function findCategoryName(tree, id) {
+  for (const item of tree) {
+    if (item.id === id) return item.name
+    if (item.children) {
+      const found = findCategoryName(item.children, id)
+      if (found) return found
+    }
+  }
+  return null
+}
 
 async function onImageUpload(file) {
   file.status = 'uploading'
@@ -69,7 +146,71 @@ function onImageDelete() {
   return true
 }
 
+const mainActiveIndex = ref(0)
+const tempCategoryId = ref(null)
+
+function onNavClick(index) {
+  mainActiveIndex.value = index
+}
+
+function onItemClick(item) {
+  tempCategoryId.value = item.id
+}
+
+function confirmCategory() {
+  if (tempCategoryId.value) {
+    form.value.categoryId = tempCategoryId.value
+  }
+  showCategoryPicker.value = false
+}
+
+// 打开分类选择弹窗
+function openCategoryPicker() {
+  tempCategoryId.value = form.value.categoryId || null
+  showCategoryPicker.value = true
+}
+
+// 加载分类对应的属性模板
+async function loadAttributeTemplates(categoryId) {
+  if (!categoryId) {
+    attributeTemplates.value = []
+    attributes.value = {}
+    return
+  }
+  try {
+    const res = await getAttributeTemplates(categoryId)
+    if (res) {
+      attributeTemplates.value = res
+      // 初始化属性值对象
+      const newAttrs = {}
+      res.forEach(t => {
+        // 保留已有的属性值
+        newAttrs[t.id] = attributes.value[t.id] || ''
+      })
+      attributes.value = newAttrs
+    }
+  } catch (e) {
+    console.error('加载属性模板失败:', e)
+    attributeTemplates.value = []
+    attributes.value = {}
+  }
+}
+
+// 监听分类变化，自动加载属性模板
+watch(() => form.value.categoryId, (newCategoryId) => {
+  loadAttributeTemplates(newCategoryId)
+})
+
 onMounted(async () => {
+  // 加载分类列表
+  try {
+    const res = await getCategoryTree()
+    if (res) {
+      categoryList.value = res
+    }
+  } catch (e) {
+    console.error('加载分类失败:', e)
+  }
   if (route.query.id) {
     isEdit.value = true
     productId.value = route.query.id
@@ -87,6 +228,14 @@ onMounted(async () => {
         if (res.mainImage) {
           imageList.value = [{ url: res.mainImage }]
         }
+        // 加载已有的属性值
+        if (res.attributes && res.attributes.length > 0) {
+          const attrs = {}
+          res.attributes.forEach(attr => {
+            attrs[attr.templateId] = attr.value
+          })
+          attributes.value = attrs
+        }
       }
     } catch (e) {
       showToast('加载失败')
@@ -97,7 +246,21 @@ onMounted(async () => {
 async function onSubmit() {
   submitting.value = true
   try {
-    const data = { ...form.value, price: Number(form.value.price), categoryId: Number(form.value.categoryId) }
+    // 构建属性数组
+    const attributeList = Object.entries(attributes.value)
+      .filter(([_, value]) => value && value.trim())
+      .map(([templateId, value]) => ({
+        templateId: Number(templateId),
+        value: value.trim()
+      }))
+
+    const data = {
+      ...form.value,
+      price: Number(form.value.price),
+      categoryId: Number(form.value.categoryId),
+      attributes: attributeList
+    }
+
     if (isEdit.value) {
       await updateProduct(productId.value, data)
       showToast('修改成功')
@@ -116,4 +279,27 @@ async function onSubmit() {
 
 <style scoped>
 .product-edit { min-height: 100vh; background: #f5f5f5; }
+
+.category-picker {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #ebedf0;
+}
+
+.picker-header span {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.category-picker :deep(.van-tree-select) {
+  flex: 1;
+}
 </style>

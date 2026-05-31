@@ -16,6 +16,7 @@ const routes = [
       { path: 'user', name: 'User', component: () => import('../pages/user/index.vue'), meta: { title: '用户管理' } },
       { path: 'merchant', name: 'Merchant', component: () => import('../pages/merchant/index.vue'), meta: { title: '商家管理' } },
       { path: 'product', name: 'Product', component: () => import('../pages/product/index.vue'), meta: { title: '商品管理' } },
+      { path: 'category', name: 'Category', component: () => import('../pages/category/index.vue'), meta: { title: '分类管理' } },
       { path: 'banner', name: 'Banner', component: () => import('../pages/banner/index.vue'), meta: { title: '轮播图管理' } },
       { path: 'order', name: 'Order', component: () => import('../pages/order/index.vue'), meta: { title: '订单管理' } },
       { path: 'config', name: 'Config', component: () => import('../pages/config/index.vue'), meta: { title: '系统配置' } },

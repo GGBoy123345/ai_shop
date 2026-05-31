@@ -7,14 +7,17 @@ import com.sxpi.pan.aimallproduct.dto.AttributeOptionDTO;
 import com.sxpi.pan.aimallproduct.dto.AttributeTemplateDTO;
 import com.sxpi.pan.aimallproduct.entity.AttributeOption;
 import com.sxpi.pan.aimallproduct.entity.AttributeTemplate;
+import com.sxpi.pan.aimallproduct.entity.Category;
 import com.sxpi.pan.aimallproduct.mapper.AttributeOptionMapper;
 import com.sxpi.pan.aimallproduct.mapper.AttributeTemplateMapper;
+import com.sxpi.pan.aimallproduct.mapper.CategoryMapper;
 import com.sxpi.pan.aimallproduct.service.AttributeTemplateService;
 import com.sxpi.pan.aimallproduct.vo.AttributeTemplateVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -23,6 +26,7 @@ public class AttributeTemplateServiceImpl implements AttributeTemplateService {
 
     private final AttributeTemplateMapper templateMapper;
     private final AttributeOptionMapper optionMapper;
+    private final CategoryMapper categoryMapper;
 
     @Override
     public List<AttributeTemplateVO> getList(Integer page, Integer size) {
@@ -34,9 +38,25 @@ public class AttributeTemplateServiceImpl implements AttributeTemplateService {
 
     @Override
     public List<AttributeTemplateVO> getByCategoryId(Long categoryId) {
+        // 收集当前分类及所有父分类的ID（支持属性继承）
+        List<Long> categoryIds = new ArrayList<>();
+        Long currentId = categoryId;
+
+        // 向上遍历收集所有父分类ID
+        while (currentId != null && currentId != 0) {
+            categoryIds.add(currentId);
+            Category category = categoryMapper.selectById(currentId);
+            if (category != null && category.getParentId() != null && category.getParentId() != 0) {
+                currentId = category.getParentId();
+            } else {
+                break;
+            }
+        }
+
+        // 查询这些分类的所有属性模板（包括父分类的属性）
         List<AttributeTemplate> list = templateMapper.selectList(
                 new LambdaQueryWrapper<AttributeTemplate>()
-                        .eq(AttributeTemplate::getCategoryId, categoryId)
+                        .in(AttributeTemplate::getCategoryId, categoryIds)
                         .orderByAsc(AttributeTemplate::getSort));
         return list.stream().map(this::toVO).toList();
     }

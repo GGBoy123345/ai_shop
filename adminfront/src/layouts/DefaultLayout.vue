@@ -26,6 +26,10 @@
           <el-icon><Goods /></el-icon>
           <template #title>商品管理</template>
         </el-menu-item>
+        <el-menu-item index="/category">
+          <el-icon><Menu /></el-icon>
+          <template #title>分类管理</template>
+        </el-menu-item>
         <el-menu-item index="/banner">
           <el-icon><Picture /></el-icon>
           <template #title>轮播图管理</template>
