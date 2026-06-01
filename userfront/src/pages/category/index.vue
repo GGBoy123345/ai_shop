@@ -50,22 +50,16 @@ const activeId = ref(null)
 const playNavAnimations = () => {
   nextTick(() => {
     // 搜索栏滑入
-    gsap.from('.van-search', {
-      y: -40,
-      opacity: 0,
-      duration: 0.5,
-      ease: 'power3.out'
-    })
+    gsap.fromTo('.van-search',
+      { y: -40, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.5, ease: 'power3.out' }
+    )
 
     // 左侧导航依次出现
-    gsap.from('.nav-item', {
-      x: -50,
-      opacity: 0,
-      duration: 0.4,
-      stagger: 0.06,
-      ease: 'power2.out',
-      delay: 0.2
-    })
+    gsap.fromTo('.nav-item',
+      { x: -30, opacity: 0 },
+      { x: 0, opacity: 1, duration: 0.4, stagger: 0.06, ease: 'power2.out', delay: 0.2 }
+    )
   })
 }
 
@@ -150,25 +144,33 @@ onMounted(async () => {
 .category-content {
   flex: 1;
   display: flex;
-  overflow: hidden;
+  min-height: 0;
 }
 .left-nav {
   width: 100px;
-  background: #fff;
+  background: #f8f8f8;
   overflow-y: auto;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+  -webkit-overflow-scrolling: touch;
+}
+.left-nav::-webkit-scrollbar {
+  width: 0;
+  display: none;
 }
 .nav-item {
-  padding: 16px 10px;
+  padding: 18px 10px;
   text-align: center;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.3s ease;
   border-left: 3px solid transparent;
   color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .nav-item:hover {
-  background: #f8f8f8;
+  background: #f0f0f0;
   color: #333;
 }
 .nav-item.active {
@@ -176,12 +178,14 @@ onMounted(async () => {
   color: #1989fa;
   font-weight: bold;
   border-left-color: #1989fa;
+  font-size: 14px;
 }
 .right-content {
   flex: 1;
   background: #fff;
   overflow-y: auto;
   padding: 12px;
+  -webkit-overflow-scrolling: touch;
 }
 .category-grid {
   display: grid;
@@ -193,7 +197,9 @@ onMounted(async () => {
   cursor: pointer;
   transition: transform 0.2s ease;
 }
-.category-item:hover { transform: translateY(-3px); }
+.category-item:hover {
+  transform: translateY(-3px);
+}
 .category-item .icon {
   width: 55px;
   height: 55px;
@@ -240,7 +246,9 @@ onMounted(async () => {
   object-fit: cover;
   transition: transform 0.3s ease;
 }
-.goods-item:hover .goods-img { transform: scale(1.05); }
+.goods-item:hover .goods-img {
+  transform: scale(1.05);
+}
 .goods-img.placeholder {
   display: flex;
   align-items: center;
@@ -249,7 +257,9 @@ onMounted(async () => {
   color: #999;
   font-size: 12px;
 }
-.goods-info { padding: 10px; }
+.goods-info {
+  padding: 10px;
+}
 .goods-title {
   font-size: 13px;
   display: -webkit-box;

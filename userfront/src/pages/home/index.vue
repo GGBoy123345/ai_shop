@@ -65,13 +65,10 @@ const loadProducts = async () => {
       nextTick(() => {
         const items = document.querySelectorAll('.goods-item')
         const newItems = Array.from(items).slice(-records.length)
-        gsap.from(newItems, {
-          y: 40,
-          opacity: 0,
-          duration: 0.5,
-          stagger: 0.08,
-          ease: 'power2.out'
-        })
+        gsap.fromTo(newItems,
+          { y: 40, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.5, stagger: 0.08, ease: 'power2.out' }
+        )
       })
     }
     if (records.length < 10) {
@@ -89,53 +86,38 @@ const loadProducts = async () => {
 const playEnterAnimations = () => {
   nextTick(() => {
     // 搜索栏从上方滑入
-    gsap.from('.search-bar', {
-      y: -60,
-      opacity: 0,
-      duration: 0.6,
-      ease: 'power3.out'
-    })
+    gsap.fromTo('.search-bar',
+      { y: -60, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out' }
+    )
 
     // Banner淡入并轻微缩放
-    gsap.from('.banner', {
-      scale: 0.9,
-      opacity: 0,
-      duration: 0.8,
-      delay: 0.2,
-      ease: 'back.out(1.2)'
-    })
+    gsap.fromTo('.banner',
+      { scale: 0.9, opacity: 0 },
+      { scale: 1, opacity: 1, duration: 0.8, delay: 0.2, ease: 'back.out(1.2)' }
+    )
 
     // 分类导航依次出现
-    gsap.from('.van-grid-item', {
-      y: 30,
-      opacity: 0,
-      duration: 0.5,
-      stagger: 0.08,
-      delay: 0.4,
-      ease: 'power2.out'
-    })
+    gsap.fromTo('.van-grid-item',
+      { y: 30, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.5, stagger: 0.08, delay: 0.4, ease: 'power2.out' }
+    )
 
     // 推荐商品标题滑入
-    gsap.from('.section-title', {
-      x: -50,
-      opacity: 0,
-      duration: 0.6,
-      delay: 0.6,
-      ease: 'power2.out'
-    })
+    gsap.fromTo('.section-title',
+      { x: -50, opacity: 0 },
+      { x: 0, opacity: 1, duration: 0.6, delay: 0.6, ease: 'power2.out' }
+    )
   })
 }
 
 // 商品卡片入场动画
 const animateProducts = () => {
   nextTick(() => {
-    gsap.from('.goods-item', {
-      y: 50,
-      opacity: 0,
-      duration: 0.6,
-      stagger: 0.1,
-      ease: 'power2.out'
-    })
+    gsap.fromTo('.goods-item',
+      { y: 50, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: 'power2.out' }
+    )
   })
 }
 
@@ -206,7 +188,6 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
-  grid-auto-rows: 1fr;
 }
 .goods-item {
   background: #fff;
@@ -215,6 +196,7 @@ onMounted(async () => {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   cursor: pointer;
+  height: 240px;
 }
 .goods-item:hover {
   transform: translateY(-4px);
@@ -225,10 +207,6 @@ onMounted(async () => {
   height: 150px;
   object-fit: cover;
   display: block;
-  transition: transform 0.4s ease;
-}
-.goods-item:hover .goods-image {
-  transform: scale(1.05);
 }
 .goods-image.placeholder {
   display: flex;
