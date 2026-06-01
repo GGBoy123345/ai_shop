@@ -39,7 +39,7 @@
 
       <div class="bottom-actions">
         <van-button v-if="order.status === 0" type="danger" size="small" @click="onCancel">取消订单</van-button>
-        <van-button v-if="order.status === 0" type="primary" size="small">去付款</van-button>
+        <van-button v-if="order.status === 0" type="primary" size="small" @click="handlePay">去付款</van-button>
         <van-button v-if="order.status === 2" type="primary" size="small" @click="onConfirm">确认收货</van-button>
       </div>
     </template>
@@ -50,7 +50,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { showToast } from 'vant'
-import { getOrderDetail, cancelOrder, confirmReceive } from '../../api/order'
+import { getOrderDetail, cancelOrder, confirmReceive, payOrder } from '../../api/order'
 
 const route = useRoute()
 const router = useRouter()
@@ -76,6 +76,17 @@ const onConfirm = async () => {
     router.back()
   } catch (e) {
     showToast(e.message || '操作失败')
+  }
+}
+
+const handlePay = async () => {
+  try {
+    await payOrder(order.value.id)
+    showToast('支付成功')
+    const res = await getOrderDetail(route.params.id)
+    order.value = res || {}
+  } catch (e) {
+    showToast(e.message || '支付失败')
   }
 }
 

@@ -12,6 +12,7 @@
         <el-tab-pane label="发送站内信" name="notification" />
         <el-tab-pane label="发送短信" name="sms" />
         <el-tab-pane label="发送邮件" name="email" />
+        <el-tab-pane label="短信日志" name="smsLogs" />
       </el-tabs>
 
       <!-- 站内信表单 -->
@@ -68,14 +69,44 @@
           <el-button type="primary" @click="sendEmail" :loading="sending">发送</el-button>
         </el-form-item>
       </el-form>
+
+      <!-- 短信日志 -->
+      <div v-if="activeTab === 'smsLogs'" style="margin-top: 20px">
+        <div style="display: flex; gap: 10px; margin-bottom: 16px">
+          <el-input v-model="smsLogSearch.phone" placeholder="按手机号筛选" style="width: 220px" clearable />
+          <el-button type="primary" @click="loadSmsLogs">搜索</el-button>
+        </div>
+        <el-table :data="smsLogs" v-loading="smsLogLoading" stripe>
+          <el-table-column prop="phone" label="手机号" width="150" />
+          <el-table-column prop="templateCode" label="模板编码" width="180" />
+          <el-table-column label="状态" width="100">
+            <template #default="{ row }">
+              <el-tag :type="row.status === 1 ? 'success' : row.status === 2 ? 'danger' : 'info'">
+                {{ row.status === 1 ? '成功' : row.status === 2 ? '失败' : '发送中' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="createTime" label="创建时间" />
+        </el-table>
+        <el-pagination
+          style="margin-top: 16px; justify-content: flex-end"
+          v-model:current-page="smsLogPage.current"
+          v-model:page-size="smsLogPage.size"
+          :total="smsLogPage.total"
+          :page-sizes="[10, 20, 50]"
+          layout="total, sizes, prev, pager, next"
+          @size-change="loadSmsLogs"
+          @current-change="loadSmsLogs"
+        />
+      </div>
     </el-card>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { createNotification, sendSms as sendSmsApi, sendEmail as sendEmailApi } from '../../api/notification'
+import { createNotification, sendSms as sendSmsApi, sendEmail as sendEmailApi, getSmsLogs } from '../../api/notification'
 
 const activeTab = ref('notification')
 const sending = ref(false)
@@ -98,6 +129,24 @@ const emailForm = reactive({
   subject: '',
   content: ''
 })
+
+const smsLogs = ref([])
+const smsLogLoading = ref(false)
+const smsLogSearch = reactive({ phone: '' })
+const smsLogPage = reactive({ current: 1, size: 10, total: 0 })
+
+async function loadSmsLogs() {
+  smsLogLoading.value = true
+  try {
+    const res = await getSmsLogs({ page: smsLogPage.current, size: smsLogPage.size, phone: smsLogSearch.phone || undefined })
+    smsLogs.value = res?.records || []
+    smsLogPage.total = res?.total || 0
+  } catch (e) {
+    smsLogs.value = []
+  } finally {
+    smsLogLoading.value = false
+  }
+}
 
 async function sendNotification() {
   if (!notifForm.userId || !notifForm.title || !notifForm.content) {
@@ -160,6 +209,10 @@ async function sendEmail() {
     sending.value = false
   }
 }
+
+watch(activeTab, (val) => {
+  if (val === 'smsLogs') loadSmsLogs()
+})
 
 function showSendDialog() {
   activeTab.value = 'notification'

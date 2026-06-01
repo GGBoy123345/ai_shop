@@ -11,3 +11,7 @@ export function sendSms(data) {
 export function sendEmail(data) {
   return request.post('/notify-svc/internal/notifications/emails/send', data)
 }
+
+export function getSmsLogs(params) {
+  return request.get('/notifications/sms-logs', { params })
+}

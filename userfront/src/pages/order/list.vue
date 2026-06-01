@@ -30,7 +30,7 @@
           <span class="total">合计: ¥{{ Number(order.payAmount || order.totalAmount).toFixed(2) }}</span>
           <div class="actions">
             <van-button v-if="order.status === 0" size="small" type="default" @click.stop="onCancel(order.id)">取消</van-button>
-            <van-button v-if="order.status === 0" size="small" type="danger">去付款</van-button>
+            <van-button v-if="order.status === 0" size="small" type="danger" @click.stop="handlePay(order.id)">去付款</van-button>
             <van-button v-if="order.status === 2" size="small" type="primary" @click.stop="onConfirm(order.id)">确认收货</van-button>
           </div>
         </div>
@@ -43,7 +43,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { showToast } from 'vant'
-import { getOrderList, cancelOrder, confirmReceive } from '../../api/order'
+import { getOrderList, cancelOrder, confirmReceive, payOrder } from '../../api/order'
 
 const route = useRoute()
 const activeTab = ref(route.query.status || '')
@@ -100,6 +100,16 @@ const onConfirm = async (id) => {
     onTabChange()
   } catch (e) {
     showToast(e.message || '操作失败')
+  }
+}
+
+const handlePay = async (id) => {
+  try {
+    await payOrder(id)
+    showToast('支付成功')
+    onTabChange()
+  } catch (e) {
+    showToast(e.message || '支付失败')
   }
 }
 

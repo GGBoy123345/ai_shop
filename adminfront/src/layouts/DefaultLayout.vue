@@ -34,6 +34,10 @@
           <el-icon><Picture /></el-icon>
           <template #title>轮播图管理</template>
         </el-menu-item>
+        <el-menu-item index="/notice">
+          <el-icon><Notification /></el-icon>
+          <template #title>公告管理</template>
+        </el-menu-item>
         <el-menu-item index="/order">
           <el-icon><List /></el-icon>
           <template #title>订单管理</template>
