@@ -19,7 +19,38 @@
       </div>
     </div>
 
-    <el-table :data="templateList" border>
+    <el-table :data="templateList" border row-key="id" ref="tableRef">
+      <el-table-column type="expand" width="50">
+        <template #default="{ row }">
+          <div class="option-manage" v-if="row.inputType === 'select' || row.inputType === 'multi_select'">
+            <div class="option-header">
+              <span>选项值管理（{{ row.name }}）</span>
+            </div>
+            <el-table :data="row.options || []" border size="small" v-if="row.options && row.options.length > 0">
+              <el-table-column prop="value" label="选项值" />
+              <el-table-column prop="sort" label="排序" width="100" />
+              <el-table-column label="操作" width="100" align="center">
+                <template #default="{ row: optRow }">
+                  <el-button size="small" type="danger" text @click="handleDeleteOption(row, optRow)">删除</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+            <div class="option-empty" v-else>暂无选项，请在下方添加</div>
+            <div class="option-add">
+              <el-input
+                v-model="newOptionValue"
+                placeholder="输入选项值，回车或点击添加"
+                style="width: 240px"
+                @keyup.enter="handleAddOption(row)"
+              />
+              <el-button type="primary" size="small" @click="handleAddOption(row)">添加选项</el-button>
+            </div>
+          </div>
+          <div class="option-manage" v-else>
+            <div class="option-empty">文本类型无需配置选项</div>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column prop="id" label="ID" width="80" />
       <el-table-column prop="categoryName" label="所属分类" width="150" />
       <el-table-column prop="name" label="属性名称" />
@@ -36,8 +67,14 @@
         </template>
       </el-table-column>
       <el-table-column prop="sort" label="排序" width="80" />
-      <el-table-column label="操作" width="200" fixed="right">
+      <el-table-column label="操作" width="260" fixed="right">
         <template #default="{ row }">
+          <el-button
+            v-if="row.inputType === 'select' || row.inputType === 'multi_select'"
+            size="small"
+            type="success"
+            @click="toggleExpand(row)"
+          >选项</el-button>
           <el-button size="small" @click="handleEdit(row)">编辑</el-button>
           <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
         </template>
@@ -87,7 +124,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
-import { getAttributeTemplates, addAttributeTemplate, updateAttributeTemplate, deleteAttributeTemplate } from '../../api/attribute'
+import { getAttributeTemplates, addAttributeTemplate, updateAttributeTemplate, deleteAttributeTemplate, addAttributeOption, deleteAttributeOption } from '../../api/attribute'
 import { getCategoryTree } from '../../api/category'
 
 const templateList = ref([])
@@ -98,6 +135,8 @@ const editId = ref(null)
 const submitting = ref(false)
 const formRef = ref(null)
 const selectedCategoryId = ref(null)
+const tableRef = ref(null)
+const newOptionValue = ref('')
 
 const inputTypeMap = {
   text: '文本',
@@ -236,6 +275,59 @@ async function handleSubmit() {
   }
 }
 
+function toggleExpand(row) {
+  tableRef.value.toggleRowExpansion(row)
+}
+
+async function handleAddOption(templateRow) {
+  const val = newOptionValue.value.trim()
+  if (!val) {
+    ElMessage.warning('请输入选项值')
+    return
+  }
+  // 检查重复
+  if (templateRow.options && templateRow.options.some(o => o.value === val)) {
+    ElMessage.warning('该选项值已存在')
+    return
+  }
+  try {
+    await addAttributeOption(templateRow.id, {
+      value: val,
+      sort: (templateRow.options?.length || 0) + 1
+    })
+    ElMessage.success('添加成功')
+    newOptionValue.value = ''
+    await loadTemplates()
+    // 重新展开该行
+    const refreshed = templateList.value.find(t => t.id === templateRow.id)
+    if (refreshed) {
+      tableRef.value.toggleRowExpansion(refreshed, true)
+    }
+  } catch (e) {
+    ElMessage.error(e.message || '添加失败')
+  }
+}
+
+async function handleDeleteOption(templateRow, optRow) {
+  try {
+    await ElMessageBox.confirm(`确定要删除选项"${optRow.value}"吗？`, '确认删除', {
+      type: 'warning'
+    })
+    await deleteAttributeOption(optRow.id)
+    ElMessage.success('删除成功')
+    await loadTemplates()
+    // 重新展开该行
+    const refreshed = templateList.value.find(t => t.id === templateRow.id)
+    if (refreshed) {
+      tableRef.value.toggleRowExpansion(refreshed, true)
+    }
+  } catch (e) {
+    if (e !== 'cancel') {
+      ElMessage.error(e.message || '删除失败')
+    }
+  }
+}
+
 onMounted(() => {
   loadCategories()
   loadTemplates()
@@ -262,5 +354,30 @@ onMounted(() => {
 .header-actions {
   display: flex;
   gap: 12px;
+}
+
+.option-manage {
+  padding: 16px 20px;
+}
+
+.option-header {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #303133;
+}
+
+.option-add {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.option-empty {
+  text-align: center;
+  color: #909399;
+  padding: 16px 0;
+  font-size: 13px;
 }
 </style>

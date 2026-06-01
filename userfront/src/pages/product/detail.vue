@@ -24,6 +24,19 @@
       <van-cell v-if="product.skus && product.skus.length" title="选择规格" is-link
         @click="showSku = true" />
     </van-cell-group>
+    <div v-if="product.attributes && product.attributes.length" class="params-section">
+      <van-collapse v-model="activeCollapse">
+        <van-collapse-item title="商品参数" name="params">
+          <div class="param-list">
+            <div v-for="attr in product.attributes" :key="attr.templateId" class="param-item">
+              <span class="param-name">{{ attr.templateName }}</span>
+              <span class="param-value">{{ attr.value }}</span>
+            </div>
+          </div>
+        </van-collapse-item>
+      </van-collapse>
+    </div>
+
     <div v-if="product.description" class="desc-section">
       <div class="desc-title">商品详情</div>
       <div class="desc-content">{{ product.description }}</div>
@@ -74,6 +87,7 @@ const showAttrs = ref(false)
 const showSku = ref(false)
 const selectedSku = ref(null)
 const cartCount = ref(0)
+const activeCollapse = ref([])
 
 const imageList = computed(() => {
   if (product.value.images) {
@@ -346,5 +360,46 @@ onMounted(async () => {
 }
 .van-goods-action {
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+}
+.params-section {
+  margin-top: 12px;
+  margin-left: 10px;
+  margin-right: 10px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.params-section :deep(.van-collapse-item__title) {
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.param-list {
+  padding: 0;
+}
+
+.param-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 14px;
+}
+
+.param-item:last-child {
+  border-bottom: none;
+}
+
+.param-name {
+  color: #999;
+  flex-shrink: 0;
+  margin-right: 16px;
+}
+
+.param-value {
+  color: #333;
+  text-align: right;
+  word-break: break-all;
 }
 </style>
