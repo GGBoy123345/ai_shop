@@ -152,13 +152,40 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.home-page { background: #f5f5f5; padding-bottom: 60px; }
-.search-bar { position: sticky; top: 0; z-index: 10; }
-.banner { height: 180px; margin: 10px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
-.banner-img { width: 100%; height: 180px; object-fit: cover; transition: transform 0.3s ease; }
-.banner-img:hover { transform: scale(1.02); }
-.category-nav { margin: 10px; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
-.section { margin: 10px; }
+.home-page {
+  background: #f5f5f5;
+  padding-bottom: 60px;
+}
+.search-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.banner {
+  height: 180px;
+  margin: 10px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.banner-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+.banner-img:hover {
+  transform: scale(1.02);
+}
+.category-nav {
+  margin: 10px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+.section {
+  margin: 10px;
+}
 .section-title {
   font-size: 18px;
   font-weight: bold;
@@ -179,6 +206,7 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
+  grid-auto-rows: 1fr;
 }
 .goods-item {
   background: #fff;
@@ -187,8 +215,6 @@ onMounted(async () => {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   cursor: pointer;
-  display: flex;
-  flex-direction: column;
 }
 .goods-item:hover {
   transform: translateY(-4px);
@@ -198,9 +224,12 @@ onMounted(async () => {
   width: 100%;
   height: 150px;
   object-fit: cover;
+  display: block;
   transition: transform 0.4s ease;
 }
-.goods-item:hover .goods-image { transform: scale(1.05); }
+.goods-item:hover .goods-image {
+  transform: scale(1.05);
+}
 .goods-image.placeholder {
   display: flex;
   align-items: center;
@@ -211,26 +240,21 @@ onMounted(async () => {
 }
 .goods-info {
   padding: 10px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
 }
 .goods-title {
   font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+  height: 42px;
+  overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  overflow: hidden;
-  line-height: 1.5;
-  color: #333;
-  min-height: 42px;
-  max-height: 42px;
 }
 .goods-price {
   color: #ee0a24;
   font-size: 18px;
   font-weight: bold;
-  margin-top: auto;
-  padding-top: 8px;
+  margin-top: 8px;
 }
 </style>
