@@ -8,6 +8,7 @@
         <img :src="item.imageUrl" class="banner-img" />
       </van-swipe-item>
     </van-swipe>
+    <van-notice-bar v-if="notices.length" left-icon="volume-o" :text="notices.map(n => n.title).join(' | ')" />
     <van-grid :column-num="4" :border="false" class="category-nav">
       <van-grid-item v-for="cat in categories" :key="cat.id" :text="cat.name"
         @click="$router.push({ path: '/category', query: { id: cat.id } })" />
@@ -44,12 +45,14 @@ import { ref, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { gsap } from 'gsap'
 import { getCategoryTree, getProductList, getBanners } from '../../api/product'
+import { getNotices } from '../../api/notice'
 
 const router = useRouter()
 const keyword = ref('')
 const banners = ref([])
 const categories = ref([])
 const products = ref([])
+const notices = ref([])
 const loading = ref(false)
 const finished = ref(false)
 const page = ref(1)
@@ -131,9 +134,10 @@ const animateProducts = () => {
 
 onMounted(async () => {
   try {
-    const [bannerRes, catRes] = await Promise.all([getBanners(), getCategoryTree()])
+    const [bannerRes, catRes, noticeRes] = await Promise.all([getBanners(), getCategoryTree(), getNotices()])
     banners.value = bannerRes || []
     categories.value = (catRes || []).slice(0, 8)
+    notices.value = noticeRes?.records || noticeRes || []
     playEnterAnimations()
   } catch (e) {
     console.error('首页数据加载失败:', e.message)
