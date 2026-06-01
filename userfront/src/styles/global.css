@@ -4,18 +4,91 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background-color: #f5f5f5;
   color: #333;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
   text-decoration: none;
   color: inherit;
+  transition: color 0.2s ease;
 }
 
 .page {
   min-height: 100vh;
   background-color: #f5f5f5;
+}
+
+/* Vue路由过渡动画 */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* 全局按钮悬停效果 */
+.van-button {
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.van-button:active {
+  transform: scale(0.97) !important;
+}
+
+/* 全局卡片悬停效果 */
+.van-cell {
+  transition: background-color 0.2s ease !important;
+}
+
+.van-cell:active {
+  background-color: #f5f5f5 !important;
+}
+
+/* 全局输入框聚焦效果 */
+.van-field__control:focus {
+  background-color: rgba(25, 137, 250, 0.03);
+  border-radius: 4px;
+}
+
+/* 平滑滚动容器 */
+.van-list,
+.van-tabs__content {
+  scroll-behavior: smooth;
+}
+
+/* 骨架屏动画优化 */
+.van-skeleton {
+  animation: skeleton-blink 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
