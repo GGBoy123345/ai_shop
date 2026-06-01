@@ -22,7 +22,15 @@
             <div v-else class="goods-image placeholder">暂无图片</div>
             <div class="goods-info">
               <div class="goods-title">{{ item.title }}</div>
-              <div class="goods-price">¥{{ Number(item.price).toFixed(2) }}</div>
+              <div class="goods-tags">
+                <span v-if="item.isHot" class="tag tag-hot">热销</span>
+                <span v-if="item.isNew" class="tag tag-new">新品</span>
+                <span v-if="item.isRecommend" class="tag tag-rec">推荐</span>
+              </div>
+              <div class="goods-price-row">
+                <span class="goods-price">¥{{ Number(item.price).toFixed(2) }}</span>
+                <span v-if="item.originalPrice" class="goods-original-price">¥{{ Number(item.originalPrice).toFixed(2) }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -233,6 +241,30 @@ onMounted(async () => {
   color: #ee0a24;
   font-size: 18px;
   font-weight: bold;
-  margin-top: 8px;
 }
+.goods-original-price {
+  color: #999;
+  font-size: 12px;
+  text-decoration: line-through;
+  margin-left: 6px;
+}
+.goods-price-row {
+  margin-top: 8px;
+  display: flex;
+  align-items: baseline;
+}
+.goods-tags {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+.tag {
+  font-size: 10px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  color: #fff;
+}
+.tag-hot { background: #ee0a24; }
+.tag-new { background: #07c160; }
+.tag-rec { background: #ff976a; }
 </style>

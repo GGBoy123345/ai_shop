@@ -76,4 +76,20 @@ public class OrderController {
     public Result<Long> countOrders() {
         return Result.success(orderService.countOrders());
     }
+
+    @GetMapping("/trend")
+    public Result<Map<String, Object>> getOrderTrend() {
+        return Result.success(orderService.getOrderTrend());
+    }
+
+    @GetMapping("/sales-trend")
+    public Result<Map<String, Object>> getSalesTrend() {
+        return Result.success(orderService.getSalesTrend());
+    }
+
+    @PostMapping("/{id}/pay")
+    public Result<Void> payOrder(@PathVariable Long id, @RequestHeader("X-User-Id") Long userId) {
+        orderService.payOrder(id, userId);
+        return Result.success();
+    }
 }

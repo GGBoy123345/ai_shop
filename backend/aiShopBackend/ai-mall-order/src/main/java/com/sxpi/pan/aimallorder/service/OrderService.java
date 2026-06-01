@@ -19,4 +19,16 @@ public interface OrderService {
     void shipOrder(Long orderId, ShipDTO dto);
     Map<String, Object> getOrderStatistics(Long merchantId);
     long countOrders();
+
+    /**
+     * 获取近7天订单趋势
+     */
+    Map<String, Object> getOrderTrend();
+
+    /**
+     * 获取近7天销售额趋势
+     */
+    Map<String, Object> getSalesTrend();
+
+    void payOrder(Long id, Long userId);
 }

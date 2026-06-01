@@ -8,7 +8,9 @@ import com.sxpi.pan.aimallnotify.dto.CreateNotificationDTO;
 import com.sxpi.pan.aimallnotify.dto.SendEmailDTO;
 import com.sxpi.pan.aimallnotify.dto.SendSmsDTO;
 import com.sxpi.pan.aimallnotify.entity.Notification;
+import com.sxpi.pan.aimallnotify.entity.SmsLog;
 import com.sxpi.pan.aimallnotify.mapper.NotificationMapper;
+import com.sxpi.pan.aimallnotify.mapper.SmsLogMapper;
 import com.sxpi.pan.aimallnotify.service.NotificationService;
 import com.sxpi.pan.aimallnotify.vo.NotificationVO;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ import java.util.List;
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationMapper notificationMapper;
+    private final SmsLogMapper smsLogMapper;
 
     private static final int ERROR_BASE = 80000;
 
@@ -99,8 +102,19 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void sendSms(SendSmsDTO dto) {
-        // Mock SMS sending - log only
-        log.info("[MOCK] 短信发送: phone={}, content={}", dto.getPhone(), dto.getContent());
+        SmsLog smsLog = new SmsLog();
+        smsLog.setPhone(dto.getPhone());
+        smsLog.setTemplateCode(dto.getTemplateCode());
+        smsLog.setParams(dto.getContent());
+        try {
+            // Mock 发送
+            log.info("[MOCK] 短信发送: phone={}, template={}, content={}", dto.getPhone(), dto.getTemplateCode(), dto.getContent());
+            smsLog.setStatus(1);
+        } catch (Exception e) {
+            smsLog.setStatus(2);
+            smsLog.setErrorMsg(e.getMessage());
+        }
+        smsLogMapper.insert(smsLog);
     }
 
     @Override

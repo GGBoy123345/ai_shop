@@ -11,7 +11,12 @@
       <div class="price">¥{{ Number(product.price || 0).toFixed(2) }}</div>
       <div v-if="product.originalPrice" class="original-price">原价: ¥{{ Number(product.originalPrice).toFixed(2) }}</div>
       <div class="title">{{ product.title || '加载中...' }}</div>
-      <div class="sales">销量: {{ product.sales || 0 }}</div>
+      <div v-if="product.subtitle" class="subtitle">{{ product.subtitle }}</div>
+      <div class="meta-row">
+        <span>销量: {{ product.sales || 0 }}</span>
+        <span>浏览: {{ product.views || 0 }}</span>
+        <span v-if="product.weight">重量: {{ product.weight }}kg</span>
+      </div>
     </div>
     <van-cell-group inset style="margin-top: 10px;">
       <van-cell v-if="product.attributes && product.attributes.length" title="商品属性" is-link
@@ -132,8 +137,8 @@ const playEnterAnimations = () => {
       duration: 0.5
     }, '-=0.2')
 
-    // 销量数字计数效果
-    tl.from('.sales', {
+    // 销量和元数据行
+    tl.from('.sales, .subtitle, .meta-row', {
       y: 15,
       opacity: 0,
       duration: 0.4
@@ -254,6 +259,19 @@ onMounted(async () => {
 .sales::before {
   content: '🔥';
   font-size: 14px;
+}
+.subtitle {
+  font-size: 13px;
+  color: #999;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+.meta-row {
+  font-size: 13px;
+  color: #666;
+  margin-top: 8px;
+  display: flex;
+  gap: 16px;
 }
 .van-cell-group {
   border-radius: 12px;

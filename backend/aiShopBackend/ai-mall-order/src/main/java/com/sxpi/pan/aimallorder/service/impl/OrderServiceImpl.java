@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -208,6 +209,70 @@ public class OrderServiceImpl implements OrderService {
         return orderMapper.selectCount(null);
     }
 
+    @Override
+    public Map<String, Object> getOrderTrend() {
+        Map<String, Object> result = new HashMap<>();
+        List<String> dates = new ArrayList<>();
+        List<Long> counts = new ArrayList<>();
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("M/d");
+
+        for (int i = 6; i >= 0; i--) {
+            LocalDateTime date = now.minusDays(i);
+            LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
+            LocalDateTime endOfDay = startOfDay.plusDays(1);
+
+            dates.add(date.format(dateFormatter));
+
+            Long count = orderMapper.selectCount(
+                    new LambdaQueryWrapper<Order>()
+                            .ge(Order::getCreateTime, startOfDay)
+                            .lt(Order::getCreateTime, endOfDay)
+            );
+            counts.add(count);
+        }
+
+        result.put("dates", dates);
+        result.put("counts", counts);
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> getSalesTrend() {
+        Map<String, Object> result = new HashMap<>();
+        List<String> dates = new ArrayList<>();
+        List<BigDecimal> amounts = new ArrayList<>();
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("M/d");
+
+        for (int i = 6; i >= 0; i--) {
+            LocalDateTime date = now.minusDays(i);
+            LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
+            LocalDateTime endOfDay = startOfDay.plusDays(1);
+
+            dates.add(date.format(dateFormatter));
+
+            // 查询当天已完成订单的销售额
+            List<Order> orders = orderMapper.selectList(
+                    new LambdaQueryWrapper<Order>()
+                            .eq(Order::getStatus, 3) // 已完成
+                            .ge(Order::getCreateTime, startOfDay)
+                            .lt(Order::getCreateTime, endOfDay)
+            );
+
+            BigDecimal dayAmount = orders.stream()
+                    .map(Order::getPayAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            amounts.add(dayAmount);
+        }
+
+        result.put("dates", dates);
+        result.put("amounts", amounts);
+        return result;
+    }
+
     private OrderVO toOrderVO(Order order) {
         OrderVO vo = new OrderVO();
         BeanUtils.copyProperties(order, vo);
@@ -220,6 +285,24 @@ public class OrderServiceImpl implements OrderService {
             return itemVO;
         }).toList());
         return vo;
+    }
+
+    @Override
+    public void payOrder(Long id, Long userId) {
+        Order order = orderMapper.selectById(id);
+        if (order == null) {
+            throw new BusinessException(40416, "订单不存在");
+        }
+        if (!order.getUserId().equals(userId)) {
+            throw new BusinessException(40301, "无权操作此订单");
+        }
+        if (order.getStatus() != 0) {
+            throw new BusinessException(40040, "订单状态不允许支付");
+        }
+        order.setStatus(1);
+        order.setPayMethod("mock");
+        order.setPayTime(LocalDateTime.now());
+        orderMapper.updateById(order);
     }
 
     private String generateOrderNo() {

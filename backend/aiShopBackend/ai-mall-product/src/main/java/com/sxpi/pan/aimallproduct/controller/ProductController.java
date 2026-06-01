@@ -94,4 +94,28 @@ public class ProductController {
     public Result<Long> countProducts() {
         return Result.success(productService.countProducts());
     }
+
+    @PutMapping("/{id}/hot")
+    public Result<Void> setHot(@PathVariable Long id, @RequestParam Integer value) {
+        productService.updateField(id, "is_hot", value);
+        return Result.success();
+    }
+
+    @PutMapping("/{id}/new")
+    public Result<Void> setNew(@PathVariable Long id, @RequestParam Integer value) {
+        productService.updateField(id, "is_new", value);
+        return Result.success();
+    }
+
+    @PutMapping("/{id}/recommend")
+    public Result<Void> setRecommend(@PathVariable Long id, @RequestParam Integer value) {
+        productService.updateField(id, "is_recommend", value);
+        return Result.success();
+    }
+
+    @PutMapping("/{id}/sort")
+    public Result<Void> setSortOrder(@PathVariable Long id, @RequestParam Integer value) {
+        productService.updateField(id, "sort_order", value);
+        return Result.success();
+    }
 }

@@ -1,6 +1,7 @@
 package com.sxpi.pan.aimallproduct.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sxpi.pan.aimallcommon.exception.BusinessException;
 import com.sxpi.pan.aimallproduct.dto.ProductDTO;
@@ -77,6 +78,10 @@ public class ProductServiceImpl implements ProductService {
         if (product == null) {
             throw new BusinessException(40414, "商品不存在");
         }
+        // 浏览量+1
+        product.setViews(product.getViews() != null ? product.getViews() + 1 : 1);
+        productMapper.updateById(product);
+
         ProductDetailVO vo = new ProductDetailVO();
         BeanUtils.copyProperties(product, vo);
 
@@ -113,6 +118,7 @@ public class ProductServiceImpl implements ProductService {
         product.setMerchantId(merchantId);
         product.setStock(0);
         product.setSales(0);
+        product.setViews(0);
         product.setStatus(2); // 待审核
         productMapper.insert(product);
 
@@ -242,6 +248,17 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public long countProducts() {
         return productMapper.selectCount(null);
+    }
+
+    @Override
+    public void updateField(Long id, String field, Object value) {
+        Product product = productMapper.selectById(id);
+        if (product == null) {
+            throw new BusinessException(40414, "商品不存在");
+        }
+        UpdateWrapper<Product> wrapper = new UpdateWrapper<>();
+        wrapper.eq("id", id).set(field, value);
+        productMapper.update(null, wrapper);
     }
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

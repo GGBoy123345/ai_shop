@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/categories")
@@ -43,5 +44,10 @@ public class CategoryController {
     public Result<Void> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
         return Result.success();
+    }
+
+    @GetMapping("/stats")
+    public Result<List<Map<String, Object>>> getCategoryStats() {
+        return Result.success(categoryService.getCategoryStats());
     }
 }

@@ -4,16 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sxpi.pan.aimallcommon.exception.BusinessException;
 import com.sxpi.pan.aimallproduct.dto.CategoryDTO;
 import com.sxpi.pan.aimallproduct.entity.Category;
+import com.sxpi.pan.aimallproduct.entity.Product;
 import com.sxpi.pan.aimallproduct.mapper.CategoryMapper;
+import com.sxpi.pan.aimallproduct.mapper.ProductMapper;
 import com.sxpi.pan.aimallproduct.service.CategoryService;
 import com.sxpi.pan.aimallproduct.vo.CategoryVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryMapper categoryMapper;
+    private final ProductMapper productMapper;
 
     @Override
     public List<CategoryVO> getCategoryTree() {
@@ -94,5 +95,55 @@ public class CategoryServiceImpl implements CategoryService {
             throw new BusinessException(40030, "该分类下有子分类，无法删除");
         }
         categoryMapper.deleteById(id);
+    }
+
+    @Override
+    public List<Map<String, Object>> getCategoryStats() {
+        // 一次性查出所有分类，避免循环内多次查询数据库
+        List<Category> allCategories = categoryMapper.selectList(
+                new LambdaQueryWrapper<Category>()
+                        .eq(Category::getStatus, 1));
+
+        // 按 parentId 分组，方便快速查找子分类
+        Map<Long, List<Category>> childrenMap = allCategories.stream()
+                .collect(Collectors.groupingBy(Category::getParentId));
+
+        // 筛选一级分类（parentId == 0）
+        List<Category> topCategories = allCategories.stream()
+                .filter(c -> c.getParentId() != null && c.getParentId() == 0)
+                .sorted(Comparator.comparingInt(c -> c.getSort() != null ? c.getSort() : 0))
+                .toList();
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Category category : topCategories) {
+            // 递归获取该分类及其所有后代分类的ID
+            List<Long> categoryIds = new ArrayList<>();
+            collectDescendantIds(category.getId(), childrenMap, categoryIds);
+
+            // 统计这些分类下的商品数量
+            Long productCount = productMapper.selectCount(
+                    new LambdaQueryWrapper<Product>()
+                            .in(Product::getCategoryId, categoryIds));
+
+            if (productCount > 0) {
+                Map<String, Object> item = new HashMap<>();
+                item.put("value", productCount);
+                item.put("name", category.getName());
+                result.add(item);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 递归收集分类及其所有后代分类的ID
+     */
+    private void collectDescendantIds(Long categoryId, Map<Long, List<Category>> childrenMap, List<Long> ids) {
+        ids.add(categoryId);
+        List<Category> children = childrenMap.getOrDefault(categoryId, Collections.emptyList());
+        for (Category child : children) {
+            collectDescendantIds(child.getId(), childrenMap, ids);
+        }
     }
 }

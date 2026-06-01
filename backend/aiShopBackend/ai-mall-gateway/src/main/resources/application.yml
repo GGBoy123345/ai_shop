@@ -15,7 +15,7 @@ spring:
         - id: user-svc
           uri: lb://user-svc
           predicates:
-            - Path=/api/auth/**,/api/users/**,/api/merchants/**,/api/addresses/**,/api/favorites/**,/api/admin/**
+            - Path=/api/auth/**,/api/users/**,/api/merchants/**,/api/addresses/**,/api/favorites/**,/api/admin/**,/api/notices/**
 
         - id: product-svc
           uri: lb://product-svc

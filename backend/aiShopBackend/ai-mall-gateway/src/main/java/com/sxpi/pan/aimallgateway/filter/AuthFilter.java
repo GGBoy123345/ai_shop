@@ -42,7 +42,8 @@ public class AuthFilter implements GlobalFilter, Ordered {
     // GET请求白名单（精确匹配）
     private static final List<String> GET_EXACT_WHITE_LIST = Arrays.asList(
             "/api/products",
-            "/api/banners"
+            "/api/banners",
+            "/api/notices"
     );
 
     // GET请求白名单（前缀匹配）

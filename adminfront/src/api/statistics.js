@@ -23,3 +23,27 @@ export function getOrderCount() {
     method: 'get'
   })
 }
+
+// 获取近7天订单趋势
+export function getOrderTrend() {
+  return request({
+    url: '/orders/trend',
+    method: 'get'
+  })
+}
+
+// 获取近7天销售额趋势
+export function getSalesTrend() {
+  return request({
+    url: '/orders/sales-trend',
+    method: 'get'
+  })
+}
+
+// 获取商品分类统计
+export function getCategoryStats() {
+  return request({
+    url: '/categories/stats',
+    method: 'get'
+  })
+}

@@ -8,9 +8,13 @@ import com.sxpi.pan.aimalluser.entity.Config;
 import com.sxpi.pan.aimalluser.entity.OperationLog;
 import com.sxpi.pan.aimalluser.mapper.ConfigMapper;
 import com.sxpi.pan.aimalluser.mapper.OperationLogMapper;
+import com.sxpi.pan.aimalluser.dto.NoticeDTO;
+import com.sxpi.pan.aimalluser.entity.Notice;
+import com.sxpi.pan.aimalluser.service.NoticeService;
 import com.sxpi.pan.aimalluser.service.UserService;
 import com.sxpi.pan.aimalluser.vo.LoginVO;
 import com.sxpi.pan.aimalluser.vo.UserVO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +30,7 @@ public class AdminController {
     private final UserService userService;
     private final ConfigMapper configMapper;
     private final OperationLogMapper operationLogMapper;
+    private final NoticeService noticeService;
 
     @PostMapping("/login")
     public Result<LoginVO> login(@RequestBody Map<String, String> body) {
@@ -108,5 +113,38 @@ public class AdminController {
         Map<String, Object> data = new HashMap<>();
         data.put("deletedCount", count);
         return Result.success(data);
+    }
+
+    // ==================== 公告管理 ====================
+
+    @GetMapping("/notices")
+    public Result<Page<Notice>> getNoticeList(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        return Result.success(noticeService.getNoticeList(page, size));
+    }
+
+    @PostMapping("/notices")
+    public Result<Void> addNotice(@Valid @RequestBody NoticeDTO dto) {
+        noticeService.addNotice(dto);
+        return Result.success();
+    }
+
+    @PutMapping("/notices/{id}")
+    public Result<Void> updateNotice(@PathVariable Long id, @Valid @RequestBody NoticeDTO dto) {
+        noticeService.updateNotice(id, dto);
+        return Result.success();
+    }
+
+    @DeleteMapping("/notices/{id}")
+    public Result<Void> deleteNotice(@PathVariable Long id) {
+        noticeService.deleteNotice(id);
+        return Result.success();
+    }
+
+    @PutMapping("/notices/{id}/status")
+    public Result<Void> updateNoticeStatus(@PathVariable Long id, @RequestParam Integer status) {
+        noticeService.updateStatus(id, status);
+        return Result.success();
     }
 }

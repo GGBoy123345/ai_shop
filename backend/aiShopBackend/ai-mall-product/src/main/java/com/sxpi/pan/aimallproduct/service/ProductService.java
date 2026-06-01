@@ -16,4 +16,5 @@ public interface ProductService {
     Page<ProductVO> getMerchantProducts(Long merchantId, Integer status, Integer page, Integer size);
     void auditProduct(Long id, Integer status, String remark);
     long countProducts();
+    void updateField(Long id, String field, Object value);
 }

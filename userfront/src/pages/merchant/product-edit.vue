@@ -7,20 +7,30 @@
         <van-field v-model="form.title" label="商品名称" placeholder="请输入商品名称" :rules="[{ required: true }]" />
         <van-field v-model="form.subtitle" label="副标题" placeholder="请输入副标题" />
         <van-field v-model="form.price" label="价格" type="number" placeholder="0.00" :rules="[{ required: true }]" />
+        <van-field v-model="form.originalPrice" label="市场价" type="number" placeholder="0.00" />
+        <van-field v-model="form.costPrice" label="成本价" type="number" placeholder="0.00" />
+        <van-field v-model="form.weight" label="重量(kg)" type="number" placeholder="0.00" />
+        <van-field v-model="form.video" label="视频链接" placeholder="请输入视频URL" />
         <van-field label="商品主图" name="mainImage">
           <template #input>
             <van-uploader v-model="imageList" :max-count="1" :after-read="onImageUpload" :before-delete="onImageDelete" accept="image/*" />
           </template>
         </van-field>
         <van-field
-          :model-value="selectedCategoryName"
+          v-model="form.categoryId"
           label="商品分类"
           placeholder="请选择商品分类"
           readonly
           is-link
           @click="openCategoryPicker"
           :rules="[{ required: true, message: '请选择商品分类' }]"
-        />
+        >
+          <template #input>
+            <span :style="{ color: selectedCategoryName === '请选择商品分类' ? '#c8c9cc' : '#323233' }">
+              {{ selectedCategoryName }}
+            </span>
+          </template>
+        </van-field>
       </van-cell-group>
 
       <!-- 商品属性（根据分类动态显示） -->
@@ -88,7 +98,8 @@ const showCategoryPicker = ref(false)
 const attributeTemplates = ref([])
 const attributes = ref({})
 const form = ref({
-  title: '', subtitle: '', price: '', mainImage: '',
+  title: '', subtitle: '', price: '', originalPrice: '', costPrice: '',
+  weight: '', video: '', mainImage: '',
   categoryId: '', description: ''
 })
 
@@ -221,8 +232,12 @@ onMounted(async () => {
           title: res.title || '',
           subtitle: res.subtitle || '',
           price: res.price || '',
+          originalPrice: res.originalPrice || '',
+          costPrice: res.costPrice || '',
+          weight: res.weight || '',
+          video: res.video || '',
           mainImage: res.mainImage || '',
-          categoryId: res.categoryId || '',
+          categoryId: res.categoryId != null ? String(res.categoryId) : '',
           description: res.description || ''
         }
         if (res.mainImage) {
@@ -246,18 +261,24 @@ onMounted(async () => {
 async function onSubmit() {
   submitting.value = true
   try {
+    // 校验分类是否已选择
+    if (!form.value.categoryId) {
+      showToast('请选择商品分类')
+      return
+    }
+
     // 构建属性数组
     const attributeList = Object.entries(attributes.value)
       .filter(([_, value]) => value && value.trim())
       .map(([templateId, value]) => ({
-        templateId: Number(templateId),
+        templateId: String(templateId),
         value: value.trim()
       }))
 
     const data = {
       ...form.value,
       price: Number(form.value.price),
-      categoryId: Number(form.value.categoryId),
+      categoryId: String(form.value.categoryId),
       attributes: attributeList
     }
 

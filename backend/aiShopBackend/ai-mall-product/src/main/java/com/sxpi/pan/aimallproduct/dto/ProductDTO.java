@@ -15,11 +15,15 @@ public class ProductDTO {
     private Long categoryId;
     @NotBlank(message = "商品标题不能为空")
     private String title;
+    private String subtitle;
     @NotNull(message = "价格不能为空")
     private BigDecimal price;
     private BigDecimal originalPrice;
+    private BigDecimal costPrice;
+    private BigDecimal weight;
     private String mainImage;
     private String images;
+    private String video;
     private String description;
     private List<ProductAttributeDTO> attributes;
 
