@@ -16,6 +16,14 @@ export const uploadImage = (file) => {
   })
 }
 
+export const uploadVideo = (file) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  return request.post('/files/upload/video', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}
+
 export const uploadBatch = (files) => {
   const formData = new FormData()
   files.forEach(file => formData.append('files', file))

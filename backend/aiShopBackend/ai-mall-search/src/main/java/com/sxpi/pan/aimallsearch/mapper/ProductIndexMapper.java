@@ -5,17 +5,18 @@ import com.sxpi.pan.aimallsearch.entity.ProductIndex;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 public interface ProductIndexMapper extends BaseMapper<ProductIndex> {
 
     @Select("<script>" +
-            "SELECT p.id, p.name, p.subtitle, p.main_image, p.price, p.market_price, p.sales, p.category_id " +
+            "SELECT p.id, p.title, p.subtitle, p.main_image, p.price, p.market_price, p.sales, p.category_id " +
             "FROM product p " +
             "WHERE p.deleted = 0 AND p.status = 1 " +
             "<if test='keyword != null and keyword != \"\"'>" +
-            "AND (p.name LIKE CONCAT('%',#{keyword},'%') OR p.subtitle LIKE CONCAT('%',#{keyword},'%'))" +
+            "AND (p.title LIKE CONCAT('%',#{keyword},'%') OR p.subtitle LIKE CONCAT('%',#{keyword},'%'))" +
             "</if>" +
             "<if test='categoryId != null'>" +
             "AND p.category_id = #{categoryId}" +
@@ -47,7 +48,7 @@ public interface ProductIndexMapper extends BaseMapper<ProductIndex> {
             "SELECT COUNT(*) FROM product p " +
             "WHERE p.deleted = 0 AND p.status = 1 " +
             "<if test='keyword != null and keyword != \"\"'>" +
-            "AND (p.name LIKE CONCAT('%',#{keyword},'%') OR p.subtitle LIKE CONCAT('%',#{keyword},'%'))" +
+            "AND (p.title LIKE CONCAT('%',#{keyword},'%') OR p.subtitle LIKE CONCAT('%',#{keyword},'%'))" +
             "</if>" +
             "<if test='categoryId != null'>" +
             "AND p.category_id = #{categoryId}" +
@@ -64,6 +65,25 @@ public interface ProductIndexMapper extends BaseMapper<ProductIndex> {
                      @Param("minPrice") java.math.BigDecimal minPrice,
                      @Param("maxPrice") java.math.BigDecimal maxPrice);
 
-    @Select("SELECT name FROM product WHERE deleted = 0 AND status = 1 AND name LIKE CONCAT('%',#{prefix},'%') LIMIT 10")
+    @Select("SELECT title FROM product WHERE deleted = 0 AND status = 1 AND title LIKE CONCAT('%',#{prefix},'%') LIMIT 10")
     List<String> suggestByPrefix(@Param("prefix") String prefix);
+
+    /**
+     * 查询上次同步后有变更的商品（增量同步）
+     * 包括：新增、修改、逻辑删除的商品
+     */
+    @Select("SELECT p.id, p.title, p.subtitle, p.main_image, p.price, p.market_price, p.sales, p.category_id, p.status, p.deleted " +
+            "FROM product p " +
+            "WHERE p.update_time > #{lastSyncTime} " +
+            "ORDER BY p.update_time ASC")
+    List<Map<String, Object>> fetchIncrementalProducts(@Param("lastSyncTime") LocalDateTime lastSyncTime);
+
+    /**
+     * 查询所有上架商品（全量同步用）
+     */
+    @Select("SELECT p.id, p.title, p.subtitle, p.main_image, p.price, p.market_price, p.sales, p.category_id, p.status " +
+            "FROM product p " +
+            "WHERE p.deleted = 0 AND p.status = 1 " +
+            "ORDER BY p.sales DESC, p.id DESC")
+    List<Map<String, Object>> fetchAllProducts();
 }

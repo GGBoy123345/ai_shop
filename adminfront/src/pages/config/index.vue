@@ -46,6 +46,19 @@
           </el-form>
         </el-tab-pane>
 
+        <el-tab-pane label="搜索配置" name="search">
+          <el-form label-width="160px" style="max-width: 600px; margin-top: 16px">
+            <el-form-item label="搜索索引同步">
+              <el-button type="primary" @click="handleSyncEs" :loading="syncing">
+                立即同步
+              </el-button>
+              <div style="color: #999; font-size: 12px; margin-top: 4px;">
+                将商品数据全量同步到 Elasticsearch 索引（启动时自动同步，每5分钟定时同步）
+              </div>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+
         <el-tab-pane label="上传配置" name="upload">
           <el-form :model="config" label-width="160px" style="max-width: 600px; margin-top: 16px">
             <el-form-item label="单文件大小限制(MB)">
@@ -70,9 +83,11 @@
 <script setup>
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { syncEsIndex } from '../../api/search'
 
 const activeTab = ref('basic')
 const saving = ref(false)
+const syncing = ref(false)
 
 const config = ref({
   siteName: 'AI智能商城',
@@ -88,6 +103,18 @@ const config = ref({
   allowedExtensions: 'jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx',
   storageType: 'minio'
 })
+
+async function handleSyncEs() {
+  syncing.value = true
+  try {
+    await syncEsIndex()
+    ElMessage.success('同步完成')
+  } catch (e) {
+    ElMessage.error('同步失败')
+  } finally {
+    syncing.value = false
+  }
+}
 
 async function handleSave() {
   saving.value = true

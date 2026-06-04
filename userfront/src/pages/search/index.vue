@@ -46,11 +46,11 @@
       <van-list v-model:loading="loading" :finished="finished" finished-text="没有更多了" @load="loadMore">
         <div class="product-card" v-for="item in results" :key="item.id"
           @click="$router.push(`/product/${item.id}`)">
-          <img v-if="item.mainImage" :src="item.mainImage" class="product-img" />
+          <img v-if="item.mainImage" v-lazy="getThumbnailUrl(item.mainImage)" class="product-img" />
           <div v-else class="product-img placeholder">暂无</div>
           <div class="product-info">
-            <div class="product-name">{{ item.name }}</div>
-            <div class="product-subtitle" v-if="item.subtitle">{{ item.subtitle }}</div>
+            <div class="product-name" v-html="item.name"></div>
+            <div class="product-subtitle" v-if="item.subtitle" v-html="item.subtitle"></div>
             <div class="product-price">¥{{ Number(item.price).toFixed(2) }}</div>
             <div class="product-sales" v-if="item.sales">已售{{ item.sales }}</div>
           </div>
@@ -64,6 +64,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { searchProducts, getHotKeywords, searchSuggest, getSearchHistory, clearSearchHistory } from '../../api/search'
+import { getThumbnailUrl } from '../../utils/image'
 import { showToast } from 'vant'
 
 const router = useRouter()
@@ -87,6 +88,7 @@ watch(keyword, (val) => {
     showPanel.value = true
     return
   }
+  // 联想搜索：每次输入变化都触发，300ms 防抖
   clearTimeout(debounceTimer)
   debounceTimer = setTimeout(async () => {
     try {
@@ -163,6 +165,7 @@ onMounted(async () => {
 .product-img.placeholder { display: flex; align-items: center; justify-content: center; background: #eee; color: #999; font-size: 12px; }
 .product-info { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
 .product-name { font-size: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.product-name :deep(em), .product-subtitle :deep(em) { font-style: normal; color: #ee0a24; }
 .product-subtitle { font-size: 12px; color: #999; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .product-price { font-size: 16px; font-weight: bold; color: #ee0a24; }
 .product-sales { font-size: 12px; color: #999; }

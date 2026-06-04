@@ -10,6 +10,7 @@ public interface FileService {
     Page<FileInfoVO> getFileList(Integer page, Integer size);
     FileInfoVO uploadFile(Long userId, MultipartFile file);
     FileInfoVO uploadImage(Long userId, MultipartFile file);
+    FileInfoVO uploadVideo(Long userId, MultipartFile file);
     List<FileInfoVO> uploadBatch(Long userId, MultipartFile[] files);
     FileInfoVO getFileInfo(Long id);
     void deleteFile(Long userId, Long id);

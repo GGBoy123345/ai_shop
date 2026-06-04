@@ -34,12 +34,18 @@ public class FileServiceImpl implements FileService {
     private final MinioClient minioClient;
     private final MinioConfig minioConfig;
 
+    /** 浏览器缓存 30 天 */
+    private static final Map<String, String> CACHE_HEADERS = Map.of("Cache-Control", "max-age=2592000");
+
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of(
-            "jpg", "jpeg", "png", "gif", "pdf", "doc", "docx", "xls", "xlsx"
+            "jpg", "jpeg", "png", "gif", "pdf", "doc", "docx", "xls", "xlsx",
+            "mp4", "webm", "mov", "avi"
     );
     private static final Set<String> IMAGE_EXTENSIONS = Set.of("jpg", "jpeg", "png", "gif");
+    private static final Set<String> VIDEO_EXTENSIONS = Set.of("mp4", "webm", "mov", "avi");
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
     private static final long MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+    private static final long MAX_VIDEO_SIZE = 100 * 1024 * 1024;
 
     @Override
     public Page<FileInfoVO> getFileList(Integer page, Integer size) {
@@ -83,9 +89,10 @@ public class FileServiceImpl implements FileService {
                         .object(thumbObjectName)
                         .stream(new ByteArrayInputStream(thumbOs.toByteArray()), thumbOs.size(), -1)
                         .contentType(file.getContentType())
+                        .headers(CACHE_HEADERS)
                         .build());
 
-                info.setThumbnailUrl(minioConfig.getEndpoint() + "/" + minioConfig.getBucket() + "/" + thumbObjectName);
+                info.setThumbnailUrl(buildFileUrl(thumbObjectName));
                 info.setWidth(originalImage.getWidth());
                 info.setHeight(originalImage.getHeight());
                 fileInfoMapper.updateById(info);
@@ -94,6 +101,16 @@ public class FileServiceImpl implements FileService {
             log.warn("缩略图生成失败: {}", e.getMessage());
         }
         return toVO(info);
+    }
+
+    @Override
+    public FileInfoVO uploadVideo(Long userId, MultipartFile file) {
+        validateFile(file, MAX_VIDEO_SIZE);
+        String ext = getExtension(file.getOriginalFilename());
+        if (!VIDEO_EXTENSIONS.contains(ext)) {
+            throw new BusinessException(70002, "文件格式不支持，仅支持mp4/webm/mov/avi");
+        }
+        return toVO(doUpload(file, userId, "video"));
     }
 
     @Override
@@ -185,13 +202,14 @@ public class FileServiceImpl implements FileService {
                     .object(objectKey)
                     .stream(file.getInputStream(), file.getSize(), -1)
                     .contentType(file.getContentType())
+                    .headers(CACHE_HEADERS)
                     .build());
         } catch (Exception e) {
             log.error("MinIO上传失败: {}", e.getMessage());
             throw new BusinessException(70004, "文件上传失败");
         }
 
-        String url = minioConfig.getEndpoint() + "/" + bucket + "/" + objectKey;
+        String url = buildFileUrl(objectKey);
 
         FileInfo info = new FileInfo();
         info.setFileName(fileName);
@@ -244,6 +262,22 @@ public class FileServiceImpl implements FileService {
     private FileInfoVO toVO(FileInfo info) {
         FileInfoVO vo = new FileInfoVO();
         BeanUtils.copyProperties(info, vo);
+        // 用 objectKey 动态生成 URL，避免数据库中存储的 URL 因 endpoint 变更而失效
+        if (info.getObjectKey() != null) {
+            vo.setUrl(buildFileUrl(info.getObjectKey()));
+        }
+        if (info.getThumbnailUrl() != null && info.getExtension() != null) {
+            String ext = info.getExtension();
+            String thumbKey = info.getObjectKey().replace("." + ext, "_thumb." + ext);
+            vo.setThumbnailUrl(buildFileUrl(thumbKey));
+        }
         return vo;
+    }
+
+    /**
+     * 根据 objectKey 动态拼接文件访问 URL
+     */
+    private String buildFileUrl(String objectKey) {
+        return minioConfig.getEndpoint() + "/" + minioConfig.getBucket() + "/" + objectKey;
     }
 }

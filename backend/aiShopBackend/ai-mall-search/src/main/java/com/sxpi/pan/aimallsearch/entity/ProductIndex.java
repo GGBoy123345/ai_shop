@@ -16,7 +16,7 @@ public class ProductIndex {
     private Long id;
     private Long merchantId;
     private Long categoryId;
-    private String name;
+    private String title;
     private String subtitle;
     private String mainImage;
     private BigDecimal price;

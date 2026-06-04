@@ -1,0 +1,7 @@
+FROM m.daocloud.io/docker.io/library/elasticsearch:7.17.9
+
+# 安装 IK 分词器
+# 如果 GitHub 下载慢，手动下载 zip 放到项目根目录，改用下面两行：
+COPY elasticsearch-analysis-ik-7.17.9.zip /tmp/
+RUN ./bin/elasticsearch-plugin install -b file:///tmp/elasticsearch-analysis-ik-7.17.9.zip
+# RUN ./bin/elasticsearch-plugin install -b https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.17.9/elasticsearch-analysis-ik-7.17.9.zip

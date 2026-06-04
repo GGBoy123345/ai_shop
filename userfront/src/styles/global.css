@@ -1,4 +1,65 @@
-* {
+/* ============================================
+   AI商城 Design Tokens & Global Styles
+   ============================================ */
+
+:root {
+  /* Brand */
+  --brand-start: #667eea;
+  --brand-end: #764ba2;
+  --brand-gradient: linear-gradient(135deg, var(--brand-start), var(--brand-end));
+
+  /* Colors */
+  --price-red: #ee0a24;
+  --page-bg: #f5f5f5;
+  --surface: #ffffff;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-muted: #999999;
+  --link-blue: #1989fa;
+  --tag-hot: #ee0a24;
+  --tag-new: #07c160;
+  --tag-recommend: #ff976a;
+  --success: #67C23A;
+  --warning: #E6A23C;
+  --danger: #F56C6C;
+
+  /* Shadows */
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-card-hover: 0 8px 24px rgba(0,0,0,0.12);
+  --shadow-header: 0 1px 4px rgba(0,0,0,0.1);
+  --shadow-dropdown: 0 8px 24px rgba(0,0,0,0.12);
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  --space-4xl: 96px;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --text-display: clamp(2rem, 5vw, 3.5rem);
+  --text-headline: 1.5rem;
+  --text-title: 1.125rem;
+  --text-body: 0.875rem;
+  --text-label: 0.75rem;
+
+  /* Layout */
+  --content-max: 1280px;
+  --header-height: 64px;
+}
+
+/* Reset */
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -6,14 +67,17 @@
 
 html {
   scroll-behavior: smooth;
+  font-size: 16px;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background-color: #f5f5f5;
-  color: #333;
+  font-family: var(--font-family);
+  background-color: var(--page-bg);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  font-size: var(--text-body);
 }
 
 a {
@@ -22,22 +86,91 @@ a {
   transition: color 0.2s ease;
 }
 
-.page {
-  min-height: 100vh;
-  background-color: #f5f5f5;
+img {
+  max-width: 100%;
+  display: block;
 }
 
-/* Vue路由过渡动画 */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+input, textarea {
+  font-family: inherit;
+  outline: none;
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+
+.container {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+/* Brand gradient text */
+.text-gradient {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Section accent bar */
+.section-accent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-accent::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: var(--brand-gradient);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* Product tags */
+.tag {
+  font-size: 10px;
+  padding: 1px 4px;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-weight: 500;
+}
+.tag-hot { background: var(--tag-hot); }
+.tag-new { background: var(--tag-new); }
+.tag-recommend { background: var(--tag-recommend); }
+
+/* Skeleton loading */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.skeleton {
+  background: #e8e8e8;
+  border-radius: var(--radius-md);
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   Vue Route Transitions
+   ============================================ */
+
 .fade-slide-enter-active,
 .fade-slide-leave-active {
   transition: all 0.3s ease;
 }
-
 .fade-slide-enter-from {
   opacity: 0;
   transform: translateX(20px);
 }
-
 .fade-slide-leave-to {
   opacity: 0;
   transform: translateX(-20px);
@@ -47,48 +180,19 @@ a {
 .fade-leave-active {
   transition: opacity 0.3s ease;
 }
-
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
 }
 
-/* 全局按钮悬停效果 */
-.van-button {
-  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-}
+/* ============================================
+   Reduced Motion
+   ============================================ */
 
-.van-button:active {
-  transform: scale(0.97) !important;
-}
-
-/* 全局卡片悬停效果 */
-.van-cell {
-  transition: background-color 0.2s ease !important;
-}
-
-.van-cell:active {
-  background-color: #f5f5f5 !important;
-}
-
-/* 全局输入框聚焦效果 */
-.van-field__control:focus {
-  background-color: rgba(25, 137, 250, 0.03);
-  border-radius: 4px;
-}
-
-/* 平滑滚动容器 */
-.van-list,
-.van-tabs__content {
-  scroll-behavior: smooth;
-}
-
-/* 骨架屏动画优化 */
-.van-skeleton {
-  animation: skeleton-blink 1.5s ease-in-out infinite;
-}
-
-@keyframes skeleton-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

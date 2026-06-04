@@ -35,6 +35,12 @@ public class FileController {
         return Result.success(fileService.uploadImage(userId, file));
     }
 
+    @PostMapping("/upload/video")
+    public Result<FileInfoVO> uploadVideo(@RequestHeader("X-User-Id") Long userId,
+                                          @RequestParam("file") MultipartFile file) {
+        return Result.success(fileService.uploadVideo(userId, file));
+    }
+
     @PostMapping("/upload/batch")
     public Result<List<FileInfoVO>> uploadBatch(@RequestHeader("X-User-Id") Long userId,
                                                 @RequestParam("files") MultipartFile[] files) {

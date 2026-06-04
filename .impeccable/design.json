@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-04T00:00:00Z",
+  "title": "Design System: AI商城",
+  "extensions": {
+    "colorMeta": {
+      "brand-gradient-start": {
+        "role": "primary",
+        "displayName": "Brand Indigo",
+        "canonical": "#667eea",
+        "tonalRamp": ["#1a2a6c", "#2d3d8f", "#3f51b2", "#536bcd", "#667eea", "#8899ee", "#aab5f2", "#ccd0f8", "#e8ebfc"]
+      },
+      "brand-gradient-end": {
+        "role": "primary",
+        "displayName": "Brand Violet",
+        "canonical": "#764ba2",
+        "tonalRamp": ["#3b1f5e", "#4e2f7a", "#613f96", "#764ba2", "#8e66b5", "#a682c8", "#be9edb", "#d6baee", "#f0e5f8"]
+      },
+      "price-red": {
+        "role": "accent",
+        "displayName": "Price Red",
+        "canonical": "#ee0a24",
+        "tonalRamp": ["#5c0410", "#7e0616", "#a0081c", "#c40a20", "#ee0a24", "#f33e52", "#f77080", "#faa2ae", "#fdd5dc"]
+      },
+      "page-bg": {
+        "role": "neutral",
+        "displayName": "Page Background",
+        "canonical": "#f5f5f5",
+        "tonalRamp": ["#2b2b2b", "#4a4a4a", "#696969", "#888888", "#a7a7a7", "#c6c6c6", "#e5e5e5", "#f5f5f5", "#fafafa"]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface White",
+        "canonical": "#ffffff",
+        "tonalRamp": ["#333333", "#555555", "#777777", "#999999", "#bbbbbb", "#dddddd", "#eeeeee", "#f8f8f8", "#ffffff"]
+      },
+      "text-primary": {
+        "role": "neutral",
+        "displayName": "Text Primary",
+        "canonical": "#333333",
+        "tonalRamp": ["#0a0a0a", "#1a1a1a", "#262626", "#333333", "#555555", "#777777", "#999999", "#bbbbbb", "#dddddd"]
+      },
+      "admin-primary": {
+        "role": "accent",
+        "displayName": "Admin Blue",
+        "canonical": "#409EFF",
+        "tonalRamp": ["#0d3a6e", "#1a5299", "#286bc4", "#409EFF", "#66b1ff", "#8ec5ff", "#b5d9ff", "#dcedff", "#f0f7ff"]
+      },
+      "admin-sidebar": {
+        "role": "neutral",
+        "displayName": "Admin Sidebar Dark",
+        "canonical": "#304156",
+        "tonalRamp": ["#0e1520", "#162030", "#1e2b40", "#304156", "#3d5470", "#4a678a", "#6080a4", "#8fa8c4", "#c4d2e2"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero headings, login page title, major section introductions. Maximum 3.5rem (56px)." },
+      "headline": { "displayName": "Headline", "purpose": "Section titles like '推荐商品', '商品详情'. 24px, 600 weight." },
+      "title": { "displayName": "Title", "purpose": "Product titles, card headings, navigation labels. 18px, 500 weight." },
+      "body": { "displayName": "Body", "purpose": "Default text for descriptions, meta info. 14px, 400 weight. Max 65–75ch line length." },
+      "label": { "displayName": "Label", "purpose": "Product tags, timestamps, tab labels, meta annotations. 12px, 500 weight." }
+    },
+    "shadows": [
+      { "name": "card-rest", "value": "0 2px 8px rgba(0,0,0,0.06)", "purpose": "Default state for product cards and content panels." },
+      { "name": "card-hover", "value": "0 8px 24px rgba(0,0,0,0.12)", "purpose": "Elevated state on hover, paired with translateY(-4px)." },
+      { "name": "dropdown", "value": "0 8px 24px rgba(0,0,0,0.12)", "purpose": "Search suggestions, popover menus." },
+      { "name": "header", "value": "0 1px 4px rgba(0,0,0,0.1)", "purpose": "Sticky headers and admin header bar." },
+      { "name": "button-glow", "value": "0 4px 15px rgba(102,126,234,0.35)", "purpose": "Primary button ambient glow." }
+    ],
+    "motion": [
+      { "name": "ease-out-quart", "value": "cubic-bezier(0.25, 1, 0.5, 1)", "purpose": "Default GSAP easing for entrance animations." },
+      { "name": "ease-out-expo", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Dramatic reveals, hero entrances." },
+      { "name": "hover-lift", "value": "transform 0.3s ease, box-shadow 0.3s ease", "purpose": "Card and button hover transitions." },
+      { "name": "page-transition", "value": "opacity 0.3s ease, transform 0.3s ease", "purpose": "Route-level fade-slide transitions." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Brand gradient pill button for primary CTAs. Hover lifts and scales; active presses.",
+      "html": "<button class=\"ds-btn-primary\">立即选购</button>",
+      "css": ".ds-btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; border: none; border-radius: 9999px; padding: 12px 32px; height: 48px; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(102,126,234,0.35); transition: transform 0.3s ease, box-shadow 0.3s ease; } .ds-btn-primary:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 25px rgba(102,126,234,0.45); } .ds-btn-primary:active { transform: scale(0.98); box-shadow: 0 2px 10px rgba(102,126,234,0.25); }"
+    },
+    {
+      "name": "Product Card",
+      "kind": "card",
+      "refersTo": "card-product",
+      "description": "E-commerce product card with image, title, price, and optional tag badge. Hover lifts with shadow.",
+      "html": "<div class=\"ds-card-product\"><div class=\"ds-card-image\"><span class=\"ds-tag-hot\">HOT</span></div><div class=\"ds-card-body\"><h3 class=\"ds-card-title\">AI智能降噪耳机 Pro Max</h3><p class=\"ds-card-price\">¥2,999</p></div></div>",
+      "css": ".ds-card-product { background: #ffffff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; } .ds-card-product:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); } .ds-card-image { position: relative; height: 240px; background: #f5f5f5; } .ds-tag-hot { position: absolute; top: 8px; left: 8px; background: #ee0a24; color: #fff; font-size: 10px; padding: 1px 4px; border-radius: 3px; } .ds-card-body { padding: 12px; } .ds-card-title { font-size: 17px; font-weight: 500; color: #333; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin: 0 0 8px; } .ds-card-price { font-size: 18px; font-weight: 700; color: #ee0a24; margin: 0; }"
+    },
+    {
+      "name": "Search Bar",
+      "kind": "input",
+      "refersTo": "input-search",
+      "description": "Round search input with sticky positioning. Used at the top of the storefront for product search.",
+      "html": "<div class=\"ds-search\"><input class=\"ds-search-input\" type=\"text\" placeholder=\"搜索商品...\" /></div>",
+      "css": ".ds-search { position: sticky; top: 0; z-index: 10; padding: 8px 16px; background: #ffffff; } .ds-search-input { width: 100%; border: none; border-radius: 9999px; padding: 10px 20px; font-size: 14px; background: #f5f5f5; color: #333; outline: none; transition: background 0.2s ease; } .ds-search-input:focus { background: rgba(25,137,250,0.03); } .ds-search-input::placeholder { color: #999; }"
+    },
+    {
+      "name": "Section Accent",
+      "kind": "custom",
+      "refersTo": "section-accent",
+      "description": "The 4px gradient accent bar that precedes section headings. A signature brand pattern.",
+      "html": "<div class=\"ds-section-title\"><span class=\"ds-accent-bar\"></span><h2>推荐商品</h2></div>",
+      "css": ".ds-section-title { display: flex; align-items: center; gap: 10px; } .ds-accent-bar { display: block; width: 4px; height: 20px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 2px; flex-shrink: 0; } .ds-section-title h2 { font-size: 18px; font-weight: 700; color: #333; margin: 0; }"
+    },
+    {
+      "name": "Product Tag",
+      "kind": "chip",
+      "refersTo": "tag-hot",
+      "description": "Small colored badge for product status. Three semantic variants: hot, new, recommend.",
+      "html": "<span class=\"ds-tag ds-tag-hot\">热销</span> <span class=\"ds-tag ds-tag-new\">新品</span> <span class=\"ds-tag ds-tag-recommend\">推荐</span>",
+      "css": ".ds-tag { font-size: 10px; padding: 1px 4px; border-radius: 3px; color: #fff; font-weight: 500; } .ds-tag-hot { background: #ee0a24; } .ds-tag-new { background: #07c160; } .ds-tag-recommend { background: #ff976a; }"
+    },
+    {
+      "name": "Admin Stat Card",
+      "kind": "card",
+      "refersTo": "admin-stat",
+      "description": "Dashboard stat card with colored icon square and metric text. Element Plus native.",
+      "html": "<div class=\"ds-stat-card\"><div class=\"ds-stat-icon\" style=\"background:rgba(103,194,58,0.1)\"><svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#67C23A\" stroke-width=\"2\"><path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M23 21v-2a4 4 0 0 0-3-3.87\"/><path d=\"M16 3.13a4 4 0 0 1 0 7.75\"/></svg></div><div class=\"ds-stat-text\"><span class=\"ds-stat-label\">商户总数</span><span class=\"ds-stat-value\">1,284</span></div></div>",
+      "css": ".ds-stat-card { display: flex; align-items: center; gap: 16px; padding: 20px; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); } .ds-stat-icon { width: 56px; height: 56px; border-radius: 12px; display: flex; align-items: center; justify-content: center; } .ds-stat-text { display: flex; flex-direction: column; } .ds-stat-label { font-size: 14px; color: #909399; } .ds-stat-value { font-size: 24px; font-weight: 700; color: #303133; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Atelier",
+    "overview": "AI商城 is a premium e-commerce platform that treats product presentation as editorial craft. Inspired by Apple's product pages — spacious, confident, image-forward — but differentiated through intelligent AI features and purposeful motion. The design system rejects the cluttered, discount-driven visual language of typical Chinese e-commerce in favor of restraint that lets products breathe and AI features earn trust.\n\nThe userfront is a desktop-first web experience, not a mobile port. Layouts use the full browser canvas: editorial widths, generous whitespace, multi-column product grids, rich hover states. The admin dashboard is a separate register — efficient, dense, Element Plus-native — where merchants manage inventory without decorative friction.",
+    "keyCharacteristics": [
+      "Editorial restraint: one strong visual moment per screen, white space as structure",
+      "Brand gradient as accent voice, not wallpaper — used sparingly on CTAs, section accents, and interactive highlights",
+      "Desktop-first storefront with full-canvas layouts and purposeful GSAP motion",
+      "AI features (comparison, virtual try-on) presented with clarity and trustworthiness",
+      "Clean separation between brand surface (userfront) and product surface (adminfront)"
+    ],
+    "rules": [
+      { "name": "The Gradient Discipline Rule", "body": "The brand gradient appears on primary CTAs, section accent bars, login surfaces, and decorative circles. It is never used as a page background, card fill, or text color.", "section": "colors" },
+      { "name": "The Price Red Rule", "body": "#ee0a24 is reserved for prices and 'hot' tags. Using it for errors, warnings, or general emphasis dilutes its commercial signal.", "section": "colors" },
+      { "name": "The Weight Contrast Rule", "body": "Hierarchy is built through weight contrast (700 → 600 → 500 → 400) and size jumps (≥1.25× ratio between levels), not through font-family switching.", "section": "typography" },
+      { "name": "The CJK Line Height Rule", "body": "Chinese text requires 0.1–0.15 more line-height than Latin text at the same size. Body text uses 1.6; headings use 1.15–1.4.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Every surface starts flat (no shadow). Shadows are earned through interaction — hover, elevation, or focus.", "section": "elevation" },
+      { "name": "The Shadow-Transform Pairing Rule", "body": "A hover shadow is always paired with a translateY lift (2–4px). Shadow without transform looks like a rendering artifact.", "section": "elevation" }
+    ],
+    "dos": [
+      "Use the brand gradient exclusively on primary CTAs, section accent bars, login surfaces, and decorative circles",
+      "Pair every hover shadow with a translateY transform (2–4px)",
+      "Keep product cards at 12px radius — the userfront's corner standard",
+      "Use #ee0a24 only for prices and 'hot' tags",
+      "Build type hierarchy through weight contrast and size jumps (≥1.25× ratio)",
+      "Respect prefers-reduced-motion: reduce — every GSAP animation needs a crossfade or instant alternative",
+      "Keep the admin dashboard Element Plus-native — no gradient buttons, no pill shapes",
+      "Use the full browser canvas for the userfront storefront"
+    ],
+    "donts": [
+      "Use the brand gradient as a page background, card fill, or text color",
+      "Use #ee0a24 for errors, warnings, or general emphasis",
+      "Apply shadows to resting-state surfaces",
+      "Use border-radius above 16px on cards (24/28/32/40px reads as 'insanely rounded')",
+      "Pair border: 1px solid X with box-shadow: 0 Npx Mpx where M >= 16px on the same element",
+      "Add tiny uppercase tracked eyebrows above every section heading",
+      "Use gradient text (background-clip: text with a gradient)",
+      "Force dark mode on the admin dashboard",
+      "Use the Vant mobile layout patterns for the userfront — it's a desktop web experience",
+      "Use all-caps body copy — reserve uppercase for short labels and product tag badges",
+      "Let display headings exceed 3.5rem (56px)"
+    ]
+  }
+}

@@ -1,0 +1,52 @@
+services:
+  minio:
+    image: docker.m.daocloud.io/minio/minio:latest
+    container_name: ai-mall-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - ./aishop/minio:/data
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+    networks:
+      - ai-mall
+
+  elasticsearch:
+    build:
+      context: .
+      dockerfile: Dockerfile-es
+    container_name: ai-mall-es
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+    volumes:
+      - ./aishop/elasticsearch/data:/usr/share/elasticsearch/data
+      - ./aishop/elasticsearch/plugins:/usr/share/elasticsearch/plugins
+    restart: unless-stopped
+    networks:
+      - ai-mall
+
+  kibana:
+    image: docker.m.daocloud.io/kibana/kibana:7.17.9
+    container_name: ai-mall-kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+    networks:
+      - ai-mall
+
+networks:
+  ai-mall:
+    driver: bridge

@@ -44,4 +44,16 @@ public class SearchController {
         searchService.clearHistory(userId);
         return Result.success(null);
     }
+
+    @PostMapping("/sync")
+    public Result<String> syncToEs() {
+        searchService.fullSync();
+        return Result.success("同步完成");
+    }
+
+    @PostMapping("/rebuild")
+    public Result<String> rebuildIndex() {
+        searchService.rebuildIndex();
+        return Result.success("重建完成");
+    }
 }

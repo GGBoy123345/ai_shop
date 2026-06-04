@@ -49,7 +49,6 @@
             <el-image v-if="form.imageUrl" :src="form.imageUrl" style="width: 320px; height: 120px" fit="cover" />
             <el-icon v-else style="width: 320px; height: 120px; border: 1px dashed #dcdfe6; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #909399"><Plus /></el-icon>
           </el-upload>
-          <el-input v-model="form.imageUrl" placeholder="图片地址（上传后自动填入）" style="margin-top: 8px" readonly />
         </el-form-item>
         <el-form-item label="跳转链接">
           <el-input v-model="form.linkUrl" placeholder="点击轮播图跳转的链接" />

@@ -3,7 +3,9 @@ package com.sxpi.pan.aimallproduct.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sxpi.pan.aimallcommon.exception.BusinessException;
+import com.sxpi.pan.aimallcommon.utils.RedisUtils;
 import com.sxpi.pan.aimallproduct.dto.ProductDTO;
 import com.sxpi.pan.aimallproduct.dto.ProductQueryDTO;
 import com.sxpi.pan.aimallproduct.entity.Product;
@@ -19,6 +21,7 @@ import com.sxpi.pan.aimallproduct.vo.ProductDetailVO;
 import com.sxpi.pan.aimallproduct.vo.ProductVO;
 import com.sxpi.pan.aimallproduct.vo.SkuVO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +29,9 @@ import org.springframework.util.StringUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
@@ -35,6 +40,11 @@ public class ProductServiceImpl implements ProductService {
     private final ProductAttributeMapper attributeMapper;
     private final SkuMapper skuMapper;
     private final AttributeTemplateMapper templateMapper;
+    private final RedisUtils redisUtils;
+    private final ObjectMapper objectMapper;
+
+    private static final String CACHE_PREFIX = "product:detail:";
+    private static final long CACHE_TTL = 30; // 分钟
 
     @Override
     public Page<ProductVO> getProductList(ProductQueryDTO query) {
@@ -74,6 +84,20 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDetailVO getProductDetail(Long id) {
+        // 1. 先查缓存
+        String cacheKey = CACHE_PREFIX + id;
+        try {
+            String cached = redisUtils.get(cacheKey);
+            if (cached != null) {
+                log.info("【缓存命中】商品ID: {}", id);
+                return objectMapper.readValue(cached, ProductDetailVO.class);
+            }
+            log.info("【缓存未命中】商品ID: {}", id);
+        } catch (Exception e) {
+            log.error("【缓存读取异常】商品ID: {}, 错误: {}", id, e.getMessage());
+        }
+
+        // 2. 缓存未命中，查数据库
         Product product = productMapper.selectById(id);
         if (product == null) {
             throw new BusinessException(40414, "商品不存在");
@@ -106,6 +130,15 @@ public class ProductServiceImpl implements ProductService {
             BeanUtils.copyProperties(s, skuVO);
             return skuVO;
         }).toList());
+
+        // 3. 写入缓存
+        try {
+            String json = objectMapper.writeValueAsString(vo);
+            redisUtils.set(cacheKey, json, CACHE_TTL, TimeUnit.MINUTES);
+            log.info("【缓存写入】商品ID: {}, 大小: {} 字节", id, json.length());
+        } catch (Exception e) {
+            log.error("【缓存写入失败】商品ID: {}, 错误: {}", id, e.getMessage());
+        }
 
         return vo;
     }
@@ -146,6 +179,7 @@ public class ProductServiceImpl implements ProductService {
         }
         BeanUtils.copyProperties(dto, product);
         productMapper.updateById(product);
+        clearCache(id);
 
         // 更新属性：先删后插
         attributeMapper.delete(new LambdaQueryWrapper<ProductAttribute>()
@@ -179,6 +213,7 @@ public class ProductServiceImpl implements ProductService {
                 // 下架商品想要重新上架，需要重新提交审核
                 product.setStatus(2); // 改为待审核状态
                 productMapper.updateById(product);
+                clearCache(id);
                 throw new BusinessException(40033, "商品已提交审核，请等待管理员审核");
             } else if (currentStatus == 2) {
                 throw new BusinessException(40034, "商品正在审核中，请等待管理员审核");
@@ -190,6 +225,7 @@ public class ProductServiceImpl implements ProductService {
                 // 上架商品可以下架
                 product.setStatus(0);
                 productMapper.updateById(product);
+                clearCache(id);
             } else if (currentStatus == 0) {
                 throw new BusinessException(40036, "商品已下架");
             } else if (currentStatus == 2) {
@@ -213,6 +249,7 @@ public class ProductServiceImpl implements ProductService {
             throw new BusinessException(40031, "只有下架状态的商品才能删除");
         }
         productMapper.deleteById(id);
+        clearCache(id);
     }
 
     @Override
@@ -243,6 +280,7 @@ public class ProductServiceImpl implements ProductService {
         product.setStatus(status);
         product.setAuditRemark(remark);
         productMapper.updateById(product);
+        clearCache(id);
     }
 
     @Override
@@ -259,9 +297,22 @@ public class ProductServiceImpl implements ProductService {
         UpdateWrapper<Product> wrapper = new UpdateWrapper<>();
         wrapper.eq("id", id).set(field, value);
         productMapper.update(null, wrapper);
+        clearCache(id);
     }
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    /**
+     * 清除商品详情缓存
+     */
+    private void clearCache(Long productId) {
+        try {
+            redisUtils.delete(CACHE_PREFIX + productId);
+            log.info("【缓存清除】商品ID: {}", productId);
+        } catch (Exception e) {
+            log.error("【缓存清除失败】商品ID: {}, 错误: {}", productId, e.getMessage());
+        }
+    }
 
     private Page<ProductVO> toVOPage(Page<Product> page) {
         Page<ProductVO> voPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());

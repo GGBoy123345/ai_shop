@@ -13,4 +13,6 @@ public interface SearchService {
     List<String> suggest(String keyword);
     List<SearchHistoryVO> getHistory(Long userId);
     void clearHistory(Long userId);
+    void fullSync();
+    void rebuildIndex();
 }
